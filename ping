@@ -1,0 +1,107 @@
+#!/usr/bin/python3
+"""
+Ping Module
+"""
+###############################################################################
+
+__author__ = "Jared Winter"
+__copyright__ = "Copyright 2019, jwinternet"
+__credits__ = ""
+__license__ = "GNU GPL v3"
+__version__ = "0.6.2"
+__updated__ = "10/22/2019"
+__email__ = "jaredwinter2015@outlook.com"
+__contributors__ = ""
+__status__ = "PROD"
+
+###############################################################################
+
+import subprocess
+import socket
+import sys
+from os import popen
+from time import localtime, strftime
+import datetime
+import re
+
+###############################################################################
+
+def dns_dig(site_id):
+	"""
+	Queries DNS servers.
+
+	:param site_id: Location site ID
+	"""
+	print(strftime("\nTime: %H:%M:%S Date: %m-%d-%Y\n", localtime()))
+
+	# Populates a list by using the dig command on the different DNS domains
+	first_list = popen(
+			"dig @192.168.0.1 jwinter.net axfr | grep [A-Za-z]-"
+			+ site_id
+	).readlines()
+	first_list.extend(popen(
+			"dig @192.168.0.2 jwinter.com axfr | grep [A-Za-z]-"
+			+ site_id.upper()
+	).readlines())
+	first_list.sort()
+	return first_list
+
+def partition_results(first_list):
+	"""
+	Filters a list by removing irrelevant DNS records from previous list
+
+	:param first_list: Contains all the DNS records retrieved in dns_dig
+	:return hostname_list: Completed list of partitioned DNS results to
+		filter out irrelevant results
+	"""
+	hostname_list = []
+	for first_l in first_list:
+		second_list = first_l.rpartition('.xyz')[0]
+		if second_list not in hostname_list:
+			hostname_list.append(second_list)
+
+	hostname_list.sort()
+	return third_list
+
+
+def ping(hostname):
+	"""
+	Filters a list by removing irrelevant DNS records from previous list
+
+	:param hostname: Contains all the hostnames retrieved in partition_results
+	"""
+	filter_1 = re.compile('^abc-', re.IGNORECASE)
+	filter_2 = re.compile('^123-.*-789$', re.IGNORECASE)
+	if (
+			'-123' in third_l or
+			'-456' in third_l or
+			'-789' in third_l or
+			'-abc' in third_l or
+			'-def' in third_l
+	):
+	# Remove the hashes to see what regex is actually filtering out
+#		print("Matched : " + hostname)
+		pass
+	elif filter_1.match(hostname):
+#		print("Matched: " + hostname)
+		pass
+	elif filter_2.match(hostname):
+#		print("Matched: " + hostname)
+		pass
+	else:
+		# If the hostname is resolveable, then it's pinged
+		item_resolves = site_info.hostname_resolves(hostname)
+		if item_resolves == 1:
+			status = subprocess.call(
+					["ping", "-q", "-c", "3", hostname],
+					stdout=subprocess.DEVNULL
+					)
+			if status == 0:
+				print(hostname.lower() + ' - UP')
+			else:
+				print(hostname.lower() + ' - DOWN')
+
+###############################################################################
+
+if __name__ == "__main__":
+	error_handling()
